@@ -1,0 +1,40 @@
+================================================================================
+ENVIRONMENT AUDIT REPORT: AI-Driven Prediction, Explainability and Optimization of Adhesive Wear
+================================================================================
+Generated Date: 2026-10-06
+
+1. OPERATING SYSTEM & HARDWARE:
+--------------------------------------------------------------------------------
+OS: Microsoft Windows 11 Home Single Language (64-bit, Build 26200)
+CPU: Intel(R) Core(TM) i5-14450HX (10 Cores, 16 Logical Processors)
+System RAM: 16.0 GB (16,474,168 KB visible)
+GPU: NVIDIA GeForce RTX 4050 Laptop GPU (Dedicated VRAM: ~6 GB / 6141 MiB)
+Integrated GPU: Intel(R) UHD Graphics
+NVIDIA Driver: 581.57 (DirectX / WDDM driver 32.0.15.8157)
+CUDA Driver Support: CUDA 13.0 capable
+
+2. STORAGE AVAILABILITY:
+--------------------------------------------------------------------------------
+C: Drive: 12.56 GB Free (Total: 174.85 GB) - LOW FREE SPACE (Preserved)
+D: Drive: 180.42 GB Free (Total: 300.29 GB) - AMPLE STORAGE (Selected for Project & Venv)
+
+3. RUNTIME & DEVELOPER TOOLING:
+--------------------------------------------------------------------------------
+Python (Default / 3.11): Python 3.11.9 (Path: C:\Program Files\Python311\python.exe)
+Python (Other): Python 3.14t (Preview/Free-threaded build detected, will NOT be used for ML stability)
+Node.js: v24.11.1
+npm: 11.6.2
+Git: git version 2.52.0.windows.1
+VS Code: 1.139.1 detected
+Docker: Not installed / Not in PATH (Not required)
+Conda: Not installed / Not in PATH (Using native venv via Python 3.11.9)
+
+4. ENVIRONMENT STRATEGY:
+--------------------------------------------------------------------------------
+Target Project Location: D:\AI\projects\adhesive_wear_ai and synced with workspace D:\ADHESIVE WEAR PREDCITON
+Virtual Environment: D:\AI\projects\adhesive_wear_ai\.venv (using Python 3.11.9)
+PyTorch Build: PyTorch with CUDA 12.4/12.1 runtime wheel or compatible stable build, with automatic CPU fallback
+ML Dependencies: NumPy, SciPy, Pandas, Scikit-Learn, XGBoost, SHAP, Joblib
+Backend Dependencies: FastAPI, Pydantic, Uvicorn, Pytest
+Frontend Stack: Vite, React, TypeScript, Tailwind CSS, Framer Motion, Lucide-React, Recharts / Canvas
+================================================================================

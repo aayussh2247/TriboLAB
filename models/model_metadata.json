@@ -1,0 +1,95 @@
+{
+  "model_name": "XGBoost",
+  "features_raw": [
+    "normal_load",
+    "sliding_speed",
+    "surface_roughness",
+    "sliding_distance",
+    "hardness",
+    "friction_coeff",
+    "temperature",
+    "lubrication",
+    "contact_pressure",
+    "wear_coefficient",
+    "material_pair"
+  ],
+  "features_transformed": [
+    "normal_load",
+    "sliding_speed",
+    "surface_roughness",
+    "sliding_distance",
+    "hardness",
+    "friction_coeff",
+    "temperature",
+    "contact_pressure",
+    "wear_coefficient",
+    "material_pair_Steel-Bronze",
+    "material_pair_Steel-CastIron",
+    "material_pair_Steel-Steel",
+    "material_pair_Ti6Al4V-Steel",
+    "lubrication"
+  ],
+  "target": "wear_volume",
+  "metrics_all_models": {
+    "Linear Regression": {
+      "cv_r2_mean": 0.5174800908057813,
+      "cv_r2_std": 0.048579987852932924,
+      "test_mae": 123.40891486890385,
+      "test_rmse": 282.21245017450696,
+      "test_r2": 0.49213311810440674,
+      "test_mape_percent": 8483.216336877978
+    },
+    "Random Forest": {
+      "cv_r2_mean": 0.9366448621254104,
+      "cv_r2_std": 0.019081145008834885,
+      "test_mae": 24.926914359612727,
+      "test_rmse": 90.53747819418837,
+      "test_r2": 0.9477297783263416,
+      "test_mape_percent": 37.59767477744469
+    },
+    "Gradient Boosting": {
+      "cv_r2_mean": 0.9407703500768413,
+      "cv_r2_std": 0.015180291902763064,
+      "test_mae": 23.755716125427945,
+      "test_rmse": 84.68850181625889,
+      "test_r2": 0.9542652346961576,
+      "test_mape_percent": 82.39680878220388
+    },
+    "XGBoost": {
+      "cv_r2_mean": 0.9359299277925357,
+      "cv_r2_std": 0.011719532346793612,
+      "test_mae": 22.46719203918947,
+      "test_rmse": 73.58500652280061,
+      "test_r2": 0.9654716186103378,
+      "test_mape_percent": 87.03152653396938
+    }
+  },
+  "best_model_metrics": {
+    "cv_r2_mean": 0.9359299277925357,
+    "cv_r2_std": 0.011719532346793612,
+    "test_mae": 22.46719203918947,
+    "test_rmse": 73.58500652280061,
+    "test_r2": 0.9654716186103378,
+    "test_mape_percent": 87.03152653396938
+  },
+  "shap_global_importance": {
+    "wear_coefficient": 153.83456420898438,
+    "normal_load": 89.07955932617188,
+    "sliding_distance": 70.25616455078125,
+    "sliding_speed": 20.901260375976562,
+    "friction_coeff": 16.88861083984375,
+    "temperature": 10.027753829956055,
+    "hardness": 7.465598106384277,
+    "surface_roughness": 2.7330920696258545,
+    "material_pair_Ti6Al4V-Steel": 1.372697353363037,
+    "contact_pressure": 0.28126412630081177,
+    "lubrication": 0.1927289217710495,
+    "material_pair_Steel-Steel": 0.14425992965698242,
+    "material_pair_Steel-CastIron": 0.029546638950705528,
+    "material_pair_Steel-Bronze": 0.012165968306362629
+  },
+  "random_seed": 42,
+  "train_samples": 3200,
+  "test_samples": 800,
+  "dataset_path": "D:/ADHESIVE WEAR PREDCITON/data/synthetic_wear_dataset.csv"
+}

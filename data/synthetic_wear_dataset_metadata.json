@@ -1,0 +1,31 @@
+{
+  "dataset_name": "Synthetic Tribology Adhesive Wear Dataset",
+  "label": "Synthetic Demonstration Dataset \u2014 Not Experimental Data",
+  "sample_count": 4000,
+  "features": [
+    "material_pair",
+    "normal_load",
+    "sliding_speed",
+    "surface_roughness",
+    "sliding_distance",
+    "hardness",
+    "friction_coeff",
+    "temperature",
+    "lubrication",
+    "contact_pressure",
+    "wear_coefficient",
+    "archard_theoretical_wear",
+    "wear_rate",
+    "wear_volume"
+  ],
+  "target_primary": "wear_volume",
+  "target_secondary": "wear_rate",
+  "random_seed": 42,
+  "assumptions": [
+    "Archard's wear law foundational framework (V = K*W*L/H)",
+    "Thermal softening reducing material hardness at elevated temperatures",
+    "Lubrication drastically reducing asperity shear strength and contact friction",
+    "PV (pressure-velocity) non-linear threshold for severe adhesive transfer/scuffing",
+    "Heteroscedastic experimental dispersion (~10% relative stochastic noise)"
+  ]
+}
