@@ -17,6 +17,7 @@ import {
 import { TribologyInputs, PredictionResult } from '../../types/tribology';
 import { InputParametersPanel } from '../InputParametersPanel';
 import { SurfaceTopographyCanvas } from '../SurfaceTopographyCanvas';
+import { AdhesiveWearSimulation } from '../AdhesiveWearSimulation';
 
 interface SimulatorProps {
   inputs: TribologyInputs;
@@ -33,19 +34,25 @@ export const WearSimulatorView: React.FC<SimulatorProps> = ({
   onRunSimulation,
   onReset,
 }) => {
-  const [visTab, setVisTab] = useState<'topography' | 'depth' | 'material' | 'animation'>('topography');
+  const [visTab, setVisTab] = useState<'topography' | 'depth' | 'material' | 'animation'>('animation');
   const [viewMode, setViewMode] = useState<'3D View' | 'Top View' | 'Side View'>('3D View');
   const [showGrid, setShowGrid] = useState<boolean>(true);
   const [realisticTexture, setRealisticTexture] = useState<boolean>(false);
   const [evolutionTab, setEvolutionTab] = useState<'volume' | 'depth' | 'friction' | 'temp'>('volume');
   const [paramToVary, setParamToVary] = useState<string>('Normal Load (N)');
 
-  // Cross section data (U-shaped wear scar dipping down to -12.6 um)
-  const crossSectionData = [];
+  // Dynamic simulation values derived from live prediction & operating physics
+  const wearVol = prediction?.wearVolume ?? 0.082;
+  const wearRate = prediction?.wearRate ?? (wearVol / Math.max(1, inputs.slidingDistance));
+  
+  // Real-time track geometry
   const trackCenter = 1.0; // mm
-  const trackWidth = 0.48; // mm
-  const maxDepth = 12.6; // µm
+  const trackWidth = Number((0.32 + (inputs.normalLoad / 1000) * 0.28).toFixed(2)); // mm
+  const computedDepth = Math.max(0.5, Math.min(80, (wearVol * 1000) / (trackWidth * 4.5)));
+  const maxDepth = Number(computedDepth.toFixed(1)); // µm
 
+  // Cross section data (U-shaped wear scar dipping down with realistic asperity ridges)
+  const crossSectionData = [];
   for (let x = 0; x <= 2.0; x += 0.05) {
     const dist = Math.abs(x - trackCenter);
     let depth = 0;
@@ -55,27 +62,26 @@ export const WearSimulatorView: React.FC<SimulatorProps> = ({
       // Pileup ridge at shoulder
       depth += (maxDepth * 0.18) * Math.exp(-5.5 * Math.pow(u - 1.15, 2));
     }
-    // Asperity roughness
-    depth += (Math.sin(x * 35) * 0.4);
+    // Asperity micro-roughness
+    depth += (Math.sin(x * 35) * (inputs.surfaceRoughness * 0.25));
     crossSectionData.push({
       position: Number(x.toFixed(2)),
       depth: Number(depth.toFixed(2)),
     });
   }
 
-  // Wear evolution with sliding distance (0 to 10000 m)
-  const evolutionData = [
-    { distance: 0, volume: 0.001 },
-    { distance: 500, volume: 0.007 },
-    { distance: 1000, volume: 0.015 },
-    { distance: 2000, volume: 0.032 },
-    { distance: 3000, volume: 0.048 },
-    { distance: 4000, volume: 0.065 },
-    { distance: 5000, volume: 0.082 },
-    { distance: 7000, volume: 0.115 },
-    { distance: 8500, volume: 0.145 },
-    { distance: 10000, volume: 0.185 },
-  ];
+  // Dynamic wear evolution with sliding distance scaled to current operating state
+  const distanceSteps = [0, 500, 1000, 2000, 3000, 4000, 5000, 7000, 8500, 10000];
+  const evolutionData = distanceSteps.map((d) => {
+    const fraction = d / 5000;
+    return {
+      distance: d,
+      volume: Number((wearVol * Math.pow(fraction, 1.05)).toFixed(4)),
+      depth: Number((maxDepth * Math.pow(fraction, 0.92)).toFixed(2)),
+      friction: Number((inputs.frictionCoeff * (1 + 0.08 * (1 - Math.exp(-fraction * 2)))).toFixed(3)),
+      temp: Number((inputs.temperature + 45 * Math.sqrt(fraction)).toFixed(1)),
+    };
+  });
 
   // Parameter study data (Normal Load vs Wear Volume & Wear Rate)
   const paramStudyData = [
@@ -175,15 +181,29 @@ export const WearSimulatorView: React.FC<SimulatorProps> = ({
               </div>
             </div>
 
-            <SurfaceTopographyCanvas
-              load={inputs.normalLoad}
-              roughness={inputs.surfaceRoughness}
-              slidingDistance={inputs.slidingDistance}
-              viewMode={viewMode}
-              showGrid={showGrid}
-              realisticTexture={realisticTexture}
-              height={225}
-            />
+            {visTab === 'animation' ? (
+              <div className="py-1">
+                <AdhesiveWearSimulation
+                  load={inputs.normalLoad}
+                  speed={inputs.slidingSpeed}
+                  roughness={inputs.surfaceRoughness}
+                  hardness={inputs.hardness}
+                  temperature={inputs.temperature}
+                  materialPair={inputs.materialPair}
+                  lubrication={inputs.lubrication === 'Lubricated'}
+                />
+              </div>
+            ) : (
+              <SurfaceTopographyCanvas
+                load={inputs.normalLoad}
+                roughness={inputs.surfaceRoughness}
+                slidingDistance={inputs.slidingDistance}
+                viewMode={viewMode}
+                showGrid={showGrid}
+                realisticTexture={realisticTexture || visTab === 'material'}
+                height={235}
+              />
+            )}
 
             {/* Bottom Controls */}
             <div className="flex items-center justify-between text-xs pt-2 mt-1 border-t border-[#F0ECE1]">
@@ -191,7 +211,10 @@ export const WearSimulatorView: React.FC<SimulatorProps> = ({
                 {(['3D View', 'Top View', 'Side View'] as const).map((mode) => (
                   <button
                     key={mode}
-                    onClick={() => setViewMode(mode)}
+                    onClick={() => {
+                      setViewMode(mode);
+                      if (visTab === 'animation') setVisTab('topography');
+                    }}
                     className={`px-2.5 py-1 rounded text-[11px] font-bold border ${
                       viewMode === mode
                         ? 'bg-[#F95721] text-white border-[#F95721]'
@@ -231,21 +254,24 @@ export const WearSimulatorView: React.FC<SimulatorProps> = ({
         {/* Col 3: 3. Simulation Results & Cross-section (Width: 3 cols) */}
         <div className="lg:col-span-3 space-y-3.5">
           <div className="bg-white border border-[#E5E0D8] rounded-lg p-3.5 shadow-sm">
-            <h3 className="font-extrabold text-[13px] text-[#111827] pb-2 mb-2 border-b border-[#F0ECE1]">
-              3. Simulation Results
+            <h3 className="font-extrabold text-[13px] text-[#111827] pb-2 mb-2 border-b border-[#F0ECE1] flex items-center justify-between">
+              <span>3. Simulation Results</span>
+              <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                AI Inference Live
+              </span>
             </h3>
 
             <div className="grid grid-cols-2 gap-2 text-center mb-2">
               <div className="bg-white border border-[#E5E0D8] p-2 rounded shadow-sm">
                 <span className="text-[10px] text-[#6B7280] block font-medium">Wear Volume</span>
                 <span className="text-[17px] font-extrabold text-[#F95721] font-mono block">
-                  0.082 <span className="text-[10px] font-normal text-[#4B5563]">mm³</span>
+                  {wearVol.toFixed(3)} <span className="text-[10px] font-normal text-[#4B5563]">mm³</span>
                 </span>
               </div>
               <div className="bg-white border border-[#E5E0D8] p-2 rounded shadow-sm">
                 <span className="text-[10px] text-[#6B7280] block font-medium">Wear Rate</span>
                 <span className="text-[12px] font-extrabold text-[#F95721] font-mono block mt-0.5">
-                  8.20 × 10⁻⁵ <span className="text-[9px] font-normal text-[#4B5563] block">mm³/m</span>
+                  {wearRate < 1e-4 ? wearRate.toExponential(2) : wearRate.toFixed(5)} <span className="text-[9px] font-normal text-[#4B5563] block">mm³/m</span>
                 </span>
               </div>
             </div>
@@ -254,13 +280,13 @@ export const WearSimulatorView: React.FC<SimulatorProps> = ({
               <div className="bg-white border border-[#E5E0D8] p-2 rounded shadow-sm">
                 <span className="text-[10px] text-[#6B7280] block font-medium">Wear Depth (Max)</span>
                 <span className="text-[15px] font-extrabold text-[#F95721] font-mono block">
-                  12.6 <span className="text-[10px] font-normal text-[#4B5563]">µm</span>
+                  {maxDepth} <span className="text-[10px] font-normal text-[#4B5563]">µm</span>
                 </span>
               </div>
               <div className="bg-white border border-[#E5E0D8] p-2 rounded shadow-sm">
                 <span className="text-[10px] text-[#6B7280] block font-medium">Wear Track Width</span>
                 <span className="text-[15px] font-extrabold text-[#111827] font-mono block">
-                  0.48 <span className="text-[10px] font-normal text-[#4B5563]">mm</span>
+                  {trackWidth} <span className="text-[10px] font-normal text-[#4B5563]">mm</span>
                 </span>
               </div>
             </div>

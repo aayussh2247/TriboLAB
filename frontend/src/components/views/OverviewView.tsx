@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Home,
   Lightbulb,
@@ -49,22 +49,23 @@ export const OverviewView: React.FC<OverviewProps> = ({
 
   const matProps = MATERIAL_PROPERTIES_MAP[inputs.materialPair];
 
-  // Quick Visualization curve data: Wear Volume vs Normal Load (log-spaced)
-  const chartData = [
-    { load: 0, volume: 0.0001 },
-    { load: 50, volume: 0.002 },
-    { load: 100, volume: 0.005 },
-    { load: 200, volume: 0.012 },
-    { load: 300, volume: 0.024 },
-    { load: 400, volume: 0.045 },
-    { load: 500, volume: prediction.wearVolume || 0.082 },
-    { load: 600, volume: 0.118 },
-    { load: 700, volume: 0.165 },
-    { load: 800, volume: 0.22 },
-    { load: 900, volume: 0.31 },
-    { load: 1000, volume: 0.44 },
-    { load: 1100, volume: 0.58 },
-  ];
+  // Dynamic curve data: Wear Volume vs Normal Load or Sliding Distance
+  const chartData = useMemo(() => {
+    const baseVol = prediction.wearVolume || 0.082;
+    if (curveType === 'distance') {
+      const distances = [0, 500, 1000, 2000, 3000, 4000, 5000, 7000, 8500, 10000];
+      return distances.map((d) => ({
+        xVal: d,
+        volume: Number((baseVol * Math.pow(Math.max(0.001, d / Math.max(1, inputs.slidingDistance)), 0.96)).toFixed(4)),
+      }));
+    } else {
+      const loads = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+      return loads.map((W) => ({
+        xVal: W,
+        volume: Number((baseVol * Math.pow(W / Math.max(1, inputs.normalLoad), 1.15)).toFixed(4)),
+      }));
+    }
+  }, [curveType, prediction.wearVolume, inputs.slidingDistance, inputs.normalLoad]);
 
   return (
     <div className="space-y-3.5">
@@ -221,20 +222,17 @@ export const OverviewView: React.FC<OverviewProps> = ({
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="2 2" stroke="#F0ECE1" />
-                  <XAxis dataKey="load" tick={{ fontSize: 9, fill: '#6B7280' }} />
+                  <XAxis dataKey="xVal" tick={{ fontSize: 9, fill: '#6B7280' }} />
                   <YAxis
-                    scale="log"
-                    domain={[0.0001, 1]}
+                    domain={['auto', 'auto']}
                     tick={{ fontSize: 8, fill: '#6B7280' }}
-                    tickFormatter={(v) => {
-                      if (v === 0.0001) return '10⁻⁴';
-                      if (v === 0.001) return '10⁻³';
-                      if (v === 0.01) return '10⁻²';
-                      if (v === 0.1) return '10⁻¹';
-                      return '';
-                    }}
+                    tickFormatter={(v) => Number(v).toFixed(3)}
                   />
-                  <Tooltip contentStyle={{ fontSize: '10px' }} />
+                  <Tooltip
+                    contentStyle={{ fontSize: '10px' }}
+                    formatter={(v: any) => [`${Number(v).toFixed(4)} mm³`, 'Wear Volume']}
+                    labelFormatter={(l) => curveType === 'distance' ? `Distance: ${l} m` : `Load: ${l} N`}
+                  />
                   <Line
                     type="monotone"
                     dataKey="volume"
@@ -246,7 +244,7 @@ export const OverviewView: React.FC<OverviewProps> = ({
               </ResponsiveContainer>
             </div>
             <div className="text-[9px] text-[#6B7280] font-mono text-center mt-0.5">
-              Normal Load (N)
+              {curveType === 'distance' ? 'Sliding Distance (m)' : 'Normal Load (N)'}
             </div>
           </div>
         </div>

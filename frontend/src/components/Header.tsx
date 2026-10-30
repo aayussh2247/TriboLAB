@@ -2,7 +2,11 @@ import React from 'react';
 import { Calendar, Clock, User } from 'lucide-react';
 import { HeaderGearArt } from './TribologyGearArt';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  isBackendConnected?: boolean;
+}
+
+export const Header: React.FC<HeaderProps> = ({ isBackendConnected = true }) => {
   return (
     <header className="bg-white border-b border-[#E5E0D8] px-5 py-2.5 flex items-center justify-between gap-4 sticky top-0 z-50 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
       {/* Left: Gear Illustration + Project Title */}
@@ -42,6 +46,20 @@ export const Header: React.FC = () => {
             <div className="text-[10px] text-[#6B7280] leading-tight">
               Mechanical Engineering
             </div>
+          </div>
+        </div>
+
+        {/* Live Backend Connection Badge */}
+        <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-[#FAF8F5] border-[#E5E0D8] text-[11px] font-mono shadow-sm">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isBackendConnected ? 'bg-emerald-400' : 'bg-amber-400'} opacity-75`}></span>
+            <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isBackendConnected ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+          </span>
+          <div className="leading-tight">
+            <span className="text-[9px] text-[#6B7280] block uppercase font-bold">FastAPI AI Engine</span>
+            <span className={`font-bold ${isBackendConnected ? 'text-emerald-700' : 'text-amber-700'}`}>
+              {isBackendConnected ? 'XGBoost Active (R²=0.9655)' : 'Local Engine Fallback'}
+            </span>
           </div>
         </div>
 

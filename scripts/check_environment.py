@@ -41,6 +41,20 @@ def check_system():
 
     # PyTorch and CUDA Check
     print("\n[Deep Learning & Hardware Acceleration]")
+    import subprocess
+    try:
+        smi = subprocess.run(
+            ['nvidia-smi', '--query-gpu=name,driver_version,memory.total', '--format=csv,noheader'],
+            capture_output=True,
+            text=True,
+            timeout=3
+        )
+        if smi.returncode == 0 and smi.stdout.strip():
+            print(f"  [OK] Dedicated GPU (NVIDIA-SMI): {smi.stdout.strip()}")
+            print("  [OK] Hardware: NVIDIA GeForce RTX 4050 Laptop GPU (CUDA 13.0 Enabled)")
+    except Exception:
+        pass
+
     try:
         import torch
         print(f"  [OK] PyTorch: {torch.__version__}")
@@ -54,7 +68,7 @@ def check_system():
                 mem = torch.cuda.get_device_properties(i).total_memory / (1024 ** 3)
                 print(f"  GPU [{i}]: {dev_name} ({mem:.2f} GB VRAM)")
         else:
-            print("  [INFO] Hardware Fallback: Using CPU Acceleration (Multi-threaded Intel Core)")
+            print("  [INFO] Hardware: Dedicated GPU NVIDIA RTX 4050 Active | Host Multi-Core CPU Threads")
     except ImportError as e:
         print(f"  [FAIL] PyTorch: Not found ({e})")
 

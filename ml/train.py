@@ -278,26 +278,62 @@ def train_and_evaluate(
     plt.close()
     print(f"Saved evaluation plots to: {plot_save_path}")
 
-    # Synchronize models and outputs to both target paths
-    if "AI" in data_path:
-        sync_target = "D:/ADHESIVE WEAR PREDCITON"
-    else:
-        sync_target = "D:/AI/projects/adhesive_wear_ai"
-    
-    os.makedirs(os.path.join(sync_target, "models"), exist_ok=True)
-    os.makedirs(os.path.join(sync_target, "outputs/model_evaluation"), exist_ok=True)
-    joblib.dump(best_pipe, os.path.join(sync_target, "models/best_model.pkl"))
-    joblib.dump(shap_explainer, os.path.join(sync_target, "models/shap_explainer.pkl"))
-    with open(os.path.join(sync_target, "models/model_metadata.json"), "w") as f:
+    # Save models and outputs directly to target directories
+    os.makedirs(models_dir, exist_ok=True)
+    os.makedirs(outputs_dir, exist_ok=True)
+    joblib.dump(best_pipe, os.path.join(models_dir, "best_model.pkl"))
+    joblib.dump(shap_explainer, os.path.join(models_dir, "shap_explainer.pkl"))
+    with open(os.path.join(models_dir, "model_metadata.json"), "w") as f:
         json.dump(metadata, f, indent=2)
-    with open(os.path.join(sync_target, "outputs/model_evaluation/metrics_comparison.json"), "w") as f:
+    with open(os.path.join(outputs_dir, "metrics_comparison.json"), "w") as f:
         json.dump(results, f, indent=2)
+    print(f"Successfully saved all models to: {models_dir}")
+
+    # Synchronize models and outputs to backup/secondary paths if present
+    sync_targets = ["D:/ADHESIVE WEAR PREDCITON", "D:/AI/projects/adhesive_wear_ai"]
+    for sync_target in sync_targets:
+        if os.path.exists(sync_target) and os.path.abspath(sync_target) != os.path.abspath(os.path.dirname(models_dir)):
+            try:
+                os.makedirs(os.path.join(sync_target, "models"), exist_ok=True)
+                os.makedirs(os.path.join(sync_target, "outputs/model_evaluation"), exist_ok=True)
+                joblib.dump(best_pipe, os.path.join(sync_target, "models/best_model.pkl"))
+                joblib.dump(shap_explainer, os.path.join(sync_target, "models/shap_explainer.pkl"))
+                with open(os.path.join(sync_target, "models/model_metadata.json"), "w") as f:
+                    json.dump(metadata, f, indent=2)
+                with open(os.path.join(sync_target, "outputs/model_evaluation/metrics_comparison.json"), "w") as f:
+                    json.dump(results, f, indent=2)
+            except Exception as e:
+                pass
 
     return metadata
 
 if __name__ == "__main__":
+    import argparse
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    parser = argparse.ArgumentParser(description="Train Adhesive Wear Machine Learning Pipeline (Real or Synthetic Data)")
+    parser.add_argument(
+        "--data",
+        type=str,
+        default=os.path.join(base_dir, "data", "synthetic_wear_dataset.csv"),
+        help="Path to CSV dataset for training (real or synthetic experimental data)"
+    )
+    parser.add_argument(
+        "--models_dir",
+        type=str,
+        default=os.path.join(base_dir, "models"),
+        help="Directory where trained model .pkl files will be saved"
+    )
+    parser.add_argument(
+        "--outputs_dir",
+        type=str,
+        default=os.path.join(base_dir, "outputs", "model_evaluation"),
+        help="Directory where evaluation metrics and plots will be saved"
+    )
+    args = parser.parse_args()
+
     train_and_evaluate(
-        data_path="D:/ADHESIVE WEAR PREDCITON/data/synthetic_wear_dataset.csv",
-        models_dir="D:/ADHESIVE WEAR PREDCITON/models",
-        outputs_dir="D:/ADHESIVE WEAR PREDCITON/outputs/model_evaluation"
+        data_path=args.data,
+        models_dir=args.models_dir,
+        outputs_dir=args.outputs_dir
     )

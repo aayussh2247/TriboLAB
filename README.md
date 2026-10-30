@@ -1,6 +1,7 @@
 <div align="center">
 
-# 🔬 AI-Driven Prediction, Explainability and Optimization of Adhesive Wear
+# 🔬 TriboLAB
+### AI-Driven Prediction, Explainability and Optimization of Adhesive Wear
 
 **An Interdisciplinary Research Platform Bridging Contact Mechanics, Machine Learning, and Tribological Optimization**
 
@@ -10,13 +11,15 @@
 [![React](https://img.shields.io/badge/Frontend-React%2018%20%7C%20TypeScript-61DAFB.svg)](https://reactjs.org/)
 [![XGBoost](https://img.shields.io/badge/Model-XGBoost%20(R%C2%B2%3D0.9655)-orange.svg)](https://xgboost.readthedocs.io/)
 [![SHAP](https://img.shields.io/badge/Explainability-TreeSHAP-red.svg)](https://shap.readthedocs.io/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.6.0%2Bcu124-EE4C2C.svg)](https://pytorch.org/)
+[![TailwindCSS](https://img.shields.io/badge/UI-Tailwind%20CSS-38B2AC.svg)](https://tailwindcss.com/)
 
 [Research Overview](#-research-overview) •
-[Physical Mechanism](#-physical-mechanism) •
+[Key Capabilities](#-key-capabilities) •
 [Architecture](#-system-architecture) •
+[Model Benchmarks](#-benchmark-model-performance) •
+[Real Data Training](#-training-on-real-experimental-data) •
 [Quick Start](#-quick-start) •
-[Live Demonstration](#-live-demonstration--screenshots) •
+[Project Structure](#-project-directory-structure) •
 [Contributing](#-contributing) •
 [License](#-license)
 
@@ -26,104 +29,176 @@
 
 ## 📌 Research Overview
 
-In mechanical assemblies (bearings, gears, journal sleeves, mechanical seals), **adhesive wear** is one of the primary failure modes. Conventional design reliance on empirical formulas like **Archard's wear law** ($V = KWL/H$) frequently fails because it neglects dynamic flash-temperature softening, localized plastic deformation of micro-asperities, and boundary lubrication breakdowns.
+In mechanical engineering assemblies (bearings, gears, journal sleeves, cylinder liners, and mechanical seals), **adhesive wear** is one of the most critical wear failure modes. Conventional machine design relies on empirical formulas such as **Archard's wear law**:
 
-This open-source repository presents an end-to-end research platform designed to investigate:
+$$V = \frac{K \cdot W \cdot L}{H}$$
 
-> **"Can machine learning predict adhesive wear from tribological operating parameters, explain the predictions with game-theoretic attribution (SHAP), and optimize operating parameters for minimized wear?"**
+Where:
+- $V$ = Wear volume ($\text{mm}^3$)
+- $K$ = Dimensionless wear coefficient
+- $W$ = Normal load ($\text{N}$)
+- $L$ = Sliding distance ($\text{m}$)
+- $H$ = Hardness of softer material ($\text{N/mm}^2$ or $\text{GPa}$)
+
+### The Engineering Challenge
+Archard's law assumes a static wear coefficient $K$ and strictly linear wear progression. In real industrial applications, it fails to account for:
+1. **Dynamic frictional flash temperatures** causing localized thermal softening.
+2. **Elastic-plastic deformation** of microscopic surface asperities.
+3. **Transition from mild to severe adhesive wear** under boundary lubrication breakdown.
+
+**TriboLAB** solves this by coupling classical tribology physics with modern machine learning (XGBoost, Random Forest, GBDT), game-theoretic feature attribution (TreeSHAP), and multi-variable numerical optimization (SciPy L-BFGS-B).
 
 ---
 
-## ⚙️ Key Features
+## ⚙️ Key Capabilities
 
-- 🔬 **Real-Time Contact Mechanics Simulator:** Interactive 2D Canvas visualizing asperity contact, normal loading penetration, cold-welded adhesive junctions, tangential shear stresses, and wear debris generation.
-- 📐 **Archard vs. ML Physical Benchmark:** Live side-by-side comparison between the classical empirical wear law and trained machine learning inferences.
-- 🤖 **Cross-Validated Machine Learning:** Trained across Linear Regression, Random Forest, GBDT, and XGBoost ($R^2 = 0.9655$, $\text{RMSE} = 73.58\,\text{mm}^3$).
-- 🧠 **Explainable AI via TreeSHAP:** Rigorous Shapley value decompositions explaining exactly why the model predicts higher or lower wear for individual operating states.
-- ⚡ **Multi-Variable SciPy Optimization:** Bounded $L$-BFGS-B minimization searching across operating parameters to recommend $60\%\text{--}90\%$ wear reductions.
-- 🎓 **Defense & Presentation Modes:** Built-in guided **Learn Mode** (7-step tribological breakdown) and fullscreen **Presentation Mode** (10-slide college defense deck with keyboard navigation).
+| Feature | Description |
+|---|---|
+| 🤖 **Production ML Engine** | High-precision predictions of wear volume and wear rate trained with 5-fold cross-validation ($R^2 = 0.9655$). |
+| 📊 **Dynamic Scientific Graphs** | Interactive high-resolution response curves: Wear vs. Sliding Distance ($0\text{--}10{,}000\,\text{m}$), Wear vs. Normal Load ($50\text{--}1{,}000\,\text{N}$), and Flash-Temp Rate vs. Speed. |
+| 🧠 **Research-Grade TreeSHAP Suite** | Additive feature attribution, Beeswarm plots, waterfall plots, and per-sample local explanations. |
+| ⚡ **L-BFGS-B Wear Optimization** | Bounded multi-variable parameter optimization discovering up to **85.4% wear reduction** while maintaining operating load capacity. |
+| 🔬 **Contact Mechanics Simulator** | Interactive Canvas visualizing micro-asperity penetration, cold-welded junctions, and adhesive debris detachment. |
+| 💻 **Hardware Telemetry HUD** | Live detection of host CPU (Intel Core / AMD Ryzen), active GPU acceleration (NVIDIA RTX with CUDA runtime, VRAM usage, temperature), and API status codes. |
+| 🧪 **Real Experimental Data Pipeline** | Plug-and-play CLI training pipeline ready to train directly on laboratory Pin-on-Disk or Reciprocating tribometer CSV data. |
 
 ---
 
 ## 🏗️ System Architecture
 
-```
-TRIBOLOGY PHYSICAL MECHANISM (Greenwood-Williamson & Flash Temperature)
-                             │
-                             ▼
-         SYNTHETIC EXPERIMENTAL DATASET (N = 4,000)
-                             │
-                             ▼
-       5-FOLD CROSS-VALIDATION & MODEL BENCHMARKING
-      (Linear Regression, Random Forest, GBDT, XGBoost)
-                             │
-                             ▼
-               BEST MODEL PIPELINE (XGBoost)
-                             │
-              ┌──────────────┴──────────────┐
-              ▼                             ▼
-       TreeSHAP EXPLAINER          SciPy L-BFGS-B ENGINE
-              │                             │
-              └──────────────┬──────────────┘
-                             ▼
-                    FASTAPI REST BACKEND
-                    (Endpoints: /predict, /archard, /explain, /optimize, /what-if)
-                             │
-                             ▼
-               REACT 18 + TYPESCRIPT FRONTEND
-              (Dark Anthracite Engineering HUD & Canvas)
+```mermaid
+flowchart TD
+    subgraph Physics ["Tribology Physics Core"]
+        A["Asperity Contact Mechanics<br>(Greenwood-Williamson)"] --> B["Flash Temperature Solver<br>(Blok-Jaeger-Archard)"]
+        B --> C["Adhesive Micro-Junction<br>Shear & Debris Formation"]
+    end
+
+    subgraph DataPipeline ["Dataset & Pipeline"]
+        C --> D["Tribological Dataset<br>(Synthetic Baseline or Real Pin-on-Disk Data)"]
+        D --> E["5-Fold Cross-Validation<br>& Scaling Preprocessor"]
+    end
+
+    subgraph MLEngine ["ML & Optimization Suite"]
+        E --> F["Trained XGBoost Pipeline<br>(best_model.pkl, R² = 0.9655)"]
+        F --> G["TreeSHAP Explainer<br>(shap_explainer.pkl)"]
+        F --> H["SciPy L-BFGS-B Optimizer<br>(Wear Minimization)"]
+    end
+
+    subgraph Backend ["FastAPI REST Backend (Port 8000)"]
+        F & G & H --> I["FastAPI REST Endpoints<br>(/predict, /hardware-status, /shap/*, /optimize)"]
+    end
+
+    subgraph Frontend ["React 18 + TypeScript Frontend (Port 5173)"]
+        I --> J["Interactive Engineering HUD<br>(Recharts, Canvas Topography, Live Telemetry)"]
+    end
 ```
 
 ---
 
 ## 📊 Benchmark Model Performance
 
+Comprehensive 5-fold cross-validation evaluation comparing machine learning architectures against the classical empirical baseline:
+
 | Algorithm | Test $R^2$ Score | Test RMSE ($\text{mm}^3$) | Test MAE ($\text{mm}^3$) | 5-Fold CV $R^2$ (Mean $\pm$ Std) | Status |
 |---|---|---|---|---|---|
-| **Linear Regression** | 0.4921 | 282.21 | 123.41 | 0.5175 $\pm$ 0.0486 | Baseline |
-| **Random Forest Regressor** | 0.9477 | 90.54 | 24.93 | 0.9366 $\pm$ 0.0191 | Ensemble |
-| **Gradient Boosting (GBDT)** | 0.9543 | 84.69 | 23.76 | 0.9408 $\pm$ 0.0152 | Ensemble |
-| **XGBoost Regressor (Best)** | **0.9655** | **73.58** | **22.47** | **0.9359 $\pm$ 0.0117** | **Selected Model** |
+| **Linear Regression (Baseline)** | 0.4921 | 282.21 | 123.41 | 0.5175 $\pm$ 0.0486 | Insufficient for Non-linear Wear |
+| **Random Forest Regressor** | 0.9477 | 90.54 | 24.93 | 0.9366 $\pm$ 0.0191 | Robust Ensemble |
+| **Gradient Boosting (GBDT)** | 0.9543 | 84.69 | 23.76 | 0.9408 $\pm$ 0.0152 | High Precision |
+| **XGBoost Regressor (Best)** | **0.9655** | **73.58** | **22.47** | **0.9359 $\pm$ 0.0117** | **Selected Production Model** |
+
+---
+
+## 🧪 Training on Real Experimental Data
+
+You can train **TriboLAB** on your own real laboratory test rig data (Pin-on-Disk, Reciprocating Tribometer, Block-on-Ring, Four-Ball wear tester).
+
+### 1. Prepare Your CSV File
+Place your CSV file into the `data/` folder (e.g. `data/real_tribology_data.csv`). Ensure it contains the following column headers:
+
+| Column Header | Unit / Type | Description |
+|---|---|---|
+| `material_pair` | String | Material combination (e.g. `Steel-Steel`, `Steel-Bronze`, `Aluminum-Steel`) |
+| `normal_load` | $\text{N}$ (Newton) | Applied normal force ($50\text{--}1000\,\text{N}$) |
+| `sliding_speed` | $\text{m/s}$ | Linear sliding velocity ($0.1\text{--}5.0\,\text{m/s}$) |
+| `surface_roughness` | $\mu\text{m}$ ($R_a$) | Initial center-line average roughness |
+| `sliding_distance` | $\text{m}$ (meters) | Total sliding track length ($50\text{--}10{,}000\,\text{m}$) |
+| `hardness` | $\text{GPa}$ | Hardness of the softer contacting counterface |
+| `friction_coeff` | Dimensionless | Dynamic friction coefficient ($\mu$) |
+| `temperature` | $^\circ\text{C}$ | Bulk / ambient operating temperature |
+| `lubrication` | $0$ or $1$ | `0` = Dry Sliding, `1` = Boundary / Fluid Lubricated |
+| `contact_pressure` | $\text{MPa}$ | Apparent nominal contact pressure |
+| `wear_coefficient`| Dimensionless | Empirical Archard wear coefficient ($K$) |
+| **`wear_volume`** | **$\text{mm}^3$ (Target)** | **Measured cumulative wear volume loss** |
+
+### 2. Execute Training
+Run the training pipeline CLI:
+
+```bash
+python ml/train.py --data data/real_tribology_data.csv
+```
+
+### What Happens Automatically:
+1. Models are trained and cross-validated on your experimental measurements.
+2. The best performing model is serialized to `models/best_model.pkl`.
+3. Game-theoretic Shapley attributions are regenerated and saved to `models/shap_explainer.pkl`.
+4. High-resolution evaluation plots are generated at `outputs/model_evaluation/evaluation_plots.png`.
+5. The application seamlessly picks up the new model upon restart.
+
+For detailed guidelines, see [**`data/README_REAL_DATA.md`**](data/README_REAL_DATA.md).
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.11+
-- Node.js v18+ & npm
-- Git
+- **Python**: 3.11 or higher
+- **Node.js**: v18 or higher (with `npm`)
+- **Git**
 
-### 1. Clone Repository
+---
+
+### Option A: 1-Click Launch (Windows)
+
+Simply double-click or run:
+```cmd
+run_project.bat
+```
+This script automatically:
+1. Launches the **FastAPI Backend** on `http://127.0.0.1:8000`
+2. Starts the **Vite React Frontend** on `http://localhost:5173`
+3. Opens your default web browser to the dashboard and API documentation.
+
+---
+
+### Option B: Manual Setup
+
+#### 1. Clone Repository
 ```bash
-git clone https://github.com/your-username/adhesive-wear-ai.git
-cd adhesive-wear-ai
+git clone https://github.com/aayussh2247/TriboLAB.git
+cd TriboLAB
 ```
 
-### 2. Environment Setup & Dependencies
+#### 2. Backend Setup
 ```bash
-# Set up Python virtual environment
+# Create and activate virtual environment
 python -m venv .venv
 
-# Activate virtual environment
-# Windows:
+# On Windows:
 .venv\Scripts\activate
-# Linux / macOS:
+# On Linux/macOS:
 source .venv/bin/activate
 
 # Install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
-```
 
-### 3. Launch Backend Service
-```bash
+# Start FastAPI server
 python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
-Interactive Swagger API documentation available at: **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)**
+Interactive Swagger API documentation: **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)**
 
-### 4. Launch Frontend Interface
-In a separate terminal:
+#### 3. Frontend Setup
+In a second terminal:
 ```bash
 cd frontend
 npm install
@@ -133,39 +208,70 @@ Open your browser at: **[http://localhost:5173](http://localhost:5173)**
 
 ---
 
-## 🏃 One-Click Windows Launcher
+## 📂 Project Directory Structure
 
-On Windows systems, you can simply run:
-```bat
-run_project.bat
 ```
-This script checks the virtual environment, executes diagnostics, and launches both services simultaneously.
+TriboLAB/
+├── backend/                  # FastAPI Application Core
+│   └── app/
+│       ├── main.py           # REST API routes & hardware telemetry
+│       ├── schemas/          # Pydantic validation schemas
+│       ├── services/         # Tribology & SHAP service layers
+│       └── tribology_core/   # Scientific physics formulations
+├── frontend/                 # React 18 + TypeScript Client
+│   ├── src/
+│   │   ├── components/       # Reusable UI & Canvas components
+│   │   ├── views/            # Full-page analytical views
+│   │   │   ├── AIPredictionView.tsx       # AI Response Graphs vs Archard
+│   │   │   ├── SettingsHardwareView.tsx   # Real Hardware Telemetry (NVIDIA/Intel)
+│   │   │   ├── SHAPExplainabilityView.tsx # Feature Attribution Suite
+│   │   │   ├── WearSimulatorView.tsx      # Contact Mechanics 2D Simulator
+│   │   │   ├── OptimizationView.tsx       # L-BFGS-B Parameter Optimization
+│   │   │   └── ConclusionLetterheadView.tsx # Defense & Conclusion Module
+│   │   ├── services/api.ts   # Axios/Fetch API client
+│   │   └── types/            # TypeScript data contracts
+├── ml/                       # Machine Learning Training Pipeline
+│   ├── train.py              # CLI trainer for real & synthetic datasets
+│   └── hybrid_model.py       # Physics-informed hybrid residual model
+├── models/                   # Serialized ML Artifacts (.pkl & metadata)
+│   ├── best_model.pkl        # Best trained XGBoost pipeline
+│   ├── shap_explainer.pkl    # Pre-computed TreeSHAP explainer
+│   └── model_metadata.json   # Model metrics, features, hyperparameters
+├── data/                     # Datasets & Templates
+│   ├── synthetic_wear_dataset.csv  # 4,000-run synthetic tribology dataset
+│   └── README_REAL_DATA.md   # Experimental data formatting guide
+├── docs/                     # Scientific Papers & Technical Notes
+├── outputs/                  # High-resolution publication plots & metrics
+├── scripts/                  # Utilities & environment verification scripts
+├── tests/                    # Pytest unit & integration test suite
+├── .gitignore                # Clean Git ignore rules (no caches/secrets)
+├── CODE_OF_CONDUCT.md        # Contributor Covenant Code of Conduct
+├── CONTRIBUTING.md           # Contribution & PR guidelines
+├── requirements.txt          # Python dependency specifications
+├── run.bat                   # Secondary launcher script
+└── run_project.bat           # Primary 1-click Windows launcher
+```
 
 ---
 
-## 🧪 Automated Testing
+## 🧪 Testing
 
-Run the full pytest suite:
+Run the automated test suite covering API endpoints, Archard formulas, SHAP attributions, and numerical solvers:
 ```bash
 pytest tests/ -v
 ```
-All unit and integration tests (API endpoints, Archard formulas, SHAP attributions, SciPy optimization, and dataset generator properties) pass with 100% success rate.
+
+Verify frontend build integrity:
+```bash
+cd frontend
+npm run build
+```
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions from engineers, tribologists, data scientists, and developers! Please read our [**Contributing Guide**](CONTRIBUTING.md) and [**Code of Conduct**](CODE_OF_CONDUCT.md).
-
-For experimental researchers, check [**Experimental Data Import Guide**](docs/experimental_data_format.md) to see how to train with your own laboratory pin-on-disk test rig data.
-
----
-
-## 📜 Scientific Limitations & Disclaimer
-
-1. **Synthetic Demonstration Dataset:** The 4,000 observations were mathematically synthesized based on Greenwood-Williamson contact area, thermal softening, and Archard formulas with 10% stochastic heteroscedastic noise. They are not direct laboratory measurements.
-2. **Conceptual 2D Visualization:** The canvas animation serves educational clarity and does not replace finite element (FEA) or molecular dynamics (MD) continuum solvers.
-3. **Engineering Use:** Results are research-oriented model estimates and should be independently validated prior to production aerospace or industrial machine fabrication.
+We welcome contributions from tribologists, mechanical engineers, data scientists, and developers! Please read our [**Contributing Guide**](CONTRIBUTING.md) and [**Code of Conduct**](CODE_OF_CONDUCT.md).
 
 ---
 

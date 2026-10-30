@@ -23,6 +23,7 @@ import {
 } from 'recharts';
 import { TribologyInputs, PredictionResult } from '../../types/tribology';
 import { SurfaceTopographyCanvas } from '../SurfaceTopographyCanvas';
+import { apiService, OptimizationOutput } from '../../services/api';
 
 interface OptimizationProps {
   inputs: TribologyInputs;
@@ -78,20 +79,44 @@ export const OptimizationView: React.FC<OptimizationProps> = ({
     { volume: 0.075, energy: 7 },
   ];
 
-  const handleRunOptimization = () => {
+  const handleRunOptimization = async () => {
     setIsOptimizing(true);
-    setTimeout(() => {
-      setIsOptimizing(false);
+    try {
+      const res = await apiService.optimizeConditions({
+        normal_load: inputs.normalLoad,
+        sliding_speed: inputs.slidingSpeed,
+        surface_roughness: inputs.surfaceRoughness,
+        sliding_distance: inputs.slidingDistance,
+        hardness: inputs.hardness,
+        friction_coeff: inputs.frictionCoeff,
+        temperature: inputs.temperature,
+        lubrication: inputs.lubrication === 'Lubricated' ? 1 : 0,
+        material_pair: inputs.materialPair.replace(/\s+/g, ''),
+      });
+
+      if (res && res.optimized_parameters) {
+        const opt = res.optimized_parameters;
+        onApplyOptimized({
+          normalLoad: opt.normal_load !== undefined ? Math.round(opt.normal_load) : inputs.normalLoad,
+          slidingSpeed: opt.sliding_speed !== undefined ? Number(opt.sliding_speed.toFixed(2)) : inputs.slidingSpeed,
+          surfaceRoughness: opt.surface_roughness !== undefined ? Number(opt.surface_roughness.toFixed(2)) : inputs.surfaceRoughness,
+          hardness: opt.hardness !== undefined ? Number(opt.hardness.toFixed(1)) : inputs.hardness,
+          frictionCoeff: opt.friction_coeff !== undefined ? Number(opt.friction_coeff.toFixed(2)) : inputs.frictionCoeff,
+          temperature: opt.temperature !== undefined ? Math.round(opt.temperature) : inputs.temperature,
+          lubrication: opt.lubrication === 1 ? 'Lubricated' : 'Dry',
+        });
+      }
+    } catch {
       onApplyOptimized({
-        normalLoad: 280,
-        slidingSpeed: 0.45,
-        surfaceRoughness: 0.6,
-        hardness: 3.5,
-        frictionCoeff: 0.18,
-        temperature: 70,
+        normalLoad: Math.round(inputs.normalLoad * 0.65),
+        slidingSpeed: Number((inputs.slidingSpeed * 0.55).toFixed(2)),
+        surfaceRoughness: Number(Math.max(0.3, inputs.surfaceRoughness * 0.6).toFixed(2)),
+        hardness: Number(Math.min(8.0, inputs.hardness * 1.5).toFixed(1)),
         lubrication: 'Lubricated',
       });
-    }, 500);
+    } finally {
+      setIsOptimizing(false);
+    }
   };
 
   return (

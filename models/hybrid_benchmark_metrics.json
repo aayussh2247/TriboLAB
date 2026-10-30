@@ -1,0 +1,59 @@
+{
+  "evaluation_records": [
+    {
+      "model_architecture": "Hybrid Physics-ML (Residual Learning)",
+      "model_type": "Physics-Informed Hybrid",
+      "mae_mm3": 19.2559,
+      "rmse_mm3": 62.5971,
+      "r_squared": 0.975,
+      "physics_constrained": true
+    },
+    {
+      "model_architecture": "Pure XGBoost",
+      "model_type": "Pure Data-Driven ML",
+      "mae_mm3": 25.3794,
+      "rmse_mm3": 79.7263,
+      "r_squared": 0.9595,
+      "physics_constrained": false
+    },
+    {
+      "model_architecture": "Pure Random Forest",
+      "model_type": "Pure Data-Driven ML",
+      "mae_mm3": 25.3502,
+      "rmse_mm3": 88.3379,
+      "r_squared": 0.9502,
+      "physics_constrained": false
+    },
+    {
+      "model_architecture": "Hybrid Physics-ML (Calibrated K)",
+      "model_type": "Physics-Informed Hybrid",
+      "mae_mm3": 30.2601,
+      "rmse_mm3": 110.2398,
+      "r_squared": 0.9225,
+      "physics_constrained": true
+    },
+    {
+      "model_architecture": "Pure Physics (Archard Law)",
+      "model_type": "Analytical Mechanics",
+      "mae_mm3": 42.6105,
+      "rmse_mm3": 180.3136,
+      "r_squared": 0.7927,
+      "physics_constrained": true
+    },
+    {
+      "model_architecture": "Pure Linear Regression",
+      "model_type": "Pure Data-Driven ML",
+      "mae_mm3": 99.1931,
+      "rmse_mm3": 275.7713,
+      "r_squared": 0.5151,
+      "physics_constrained": false
+    }
+  ],
+  "train_sample_count": 3200,
+  "test_sample_count": 800,
+  "target_variable": "wear_volume",
+  "target_unit": "mm\u00b3",
+  "random_seed": 42,
+  "best_model_name": "Hybrid Physics-ML (Residual Learning)",
+  "best_r_squared": 0.975
+}

@@ -13,6 +13,7 @@ import {
   Airplay,
   Database,
   Lightbulb,
+  FileText,
   FileCheck2,
   Settings as SettingsIcon,
   LucideIcon,
@@ -63,8 +64,8 @@ const PRIMARY_NAV_ITEMS: NavItem[] = [
 
 const SECONDARY_NAV_ITEMS: NavItem[] = [
   { id: 'dataset', label: 'Dataset', icon: Database },
-  { id: 'research-insights', label: 'Research Insights', icon: Lightbulb },
-  { id: 'conclusion', label: 'Conclusion', icon: FileCheck2 },
+  { id: 'research-insights', label: 'Research Paper', icon: FileText },
+  { id: 'conclusion', label: 'Conclusion (Under Dev)', icon: FileCheck2 },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 
